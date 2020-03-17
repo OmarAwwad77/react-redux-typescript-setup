@@ -1,26 +1,45 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { connect } from 'react-redux';
+import { StoreState } from './reducers/index';
+import { Todo, fetchTodos, deleteTodo } from './actions/index';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+interface AppProps {
+	todos: Todo[];
+	fetchTodos: typeof fetchTodos;
+	deleteTodo: typeof deleteTodo;
 }
 
-export default App;
+class App extends React.Component<AppProps> {
+	componentDidMount() {
+		this.props.fetchTodos();
+	}
+
+	renderList = (): JSX.Element[] => {
+		return this.props.todos.map((todo: Todo) => (
+			<li onClick={() => this.props.deleteTodo(todo.id)} key={todo.id}>
+				{todo.title}
+			</li>
+		));
+	};
+
+	render() {
+		console.log(this.props.todos);
+		return (
+			<div className='App'>
+				<p>Todos: </p>
+				<ul>{this.renderList()}</ul>
+			</div>
+		);
+	}
+}
+
+const mapStateToProps = ({ todos }: StoreState): { todos: Todo[] } => ({
+	todos
+});
+
+const mapDispatchToProps = (dispatch: any) => ({
+	fetchTodos: () => dispatch(fetchTodos()),
+	deleteTodo: (id: number) => dispatch(deleteTodo(id))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
